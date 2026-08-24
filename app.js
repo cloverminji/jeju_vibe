@@ -16,6 +16,7 @@ const MEAT_INGREDIENTS = [
 ];
 
 const BASIC_CONDIMENTS = ['식용유', '고추장', '된장', '간장'];
+
 const MENU_DATABASE = [
     {
         name: '맑은 소고기 무국',
@@ -66,6 +67,7 @@ const MENU_DATABASE = [
         score: 0
     }
 ];
+
 const MENU_DATABASE_PART2 = [
     {
         name: '바삭한 감자전',
@@ -184,6 +186,7 @@ const MENU_DATABASE_PART3 = [
     }
 ];
 MENU_DATABASE.push(...MENU_DATABASE_PART3);
+
 const WEATHER_TAG_RULES = {
     rainy: {
         types: ['국/탕', '찌개', '부침', '튀김류'],
@@ -238,68 +241,64 @@ function initIngredients() {
     });
 }
 function createIngredientCard(ing) {
-    const card = document.createElement('div');
-    card.className = \ingredient-item \\;
+    const card = document.createElement("div");
+    card.className = "ingredient-item " + ing.type;
     card.dataset.id = ing.id;
     card.dataset.name = ing.name;
 
-    let mediaHtml = '';
+    let mediaHtml = "";
     if (ing.image) {
-        mediaHtml = \<img src=" \\ class=\ingredient-img\ alt=\\\>\;
- } else {
- mediaHtml = \<span class=\ingredient-emoji\>\</span>\;
- }
+        mediaHtml = "<img src=\"" + ing.image + "\" class=\"ingredient-img\" alt=\"" + ing.name + "\">";
+    } else {
+        mediaHtml = "<span class=\"ingredient-emoji\">" + ing.emoji + "</span>";
+    }
 
- card.innerHTML = \
- \
- <span class=\ingredient-name\>\</span>
- \;
+    card.innerHTML = mediaHtml + " <span class=\"ingredient-name\">" + ing.name + "</span>";
 
- card.addEventListener('click', () => {
- toggleIngredient(ing.id, card);
- });
+    card.addEventListener("click", () => {
+        toggleIngredient(ing.id, card);
+    });
 
- return card;
+    return card;
 }
 
 function toggleIngredient(id, cardElement) {
- if (state.selectedIngredients.has(id)) {
- state.selectedIngredients.delete(id);
- cardElement.classList.remove('selected');
- } else {
- state.selectedIngredients.add(id);
- cardElement.classList.add('selected');
- }
- saveIngredientsToLocalStorage();
+    if (state.selectedIngredients.has(id)) {
+        state.selectedIngredients.delete(id);
+        cardElement.classList.remove("selected");
+    } else {
+        state.selectedIngredients.add(id);
+        cardElement.classList.add("selected");
+    }
+    saveIngredientsToLocalStorage();
 }
 
 async function getAddressFromCoords(lat, lon) {
- try {
- const response = await fetch(\https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\&lon=\&accept-language=ko\, {
- headers: {
- 'User-Agent': 'JejuVibeApp/1.0 (cloverminji@github.com)'
- }
- });
- if (!response.ok) return null;
- const data = await response.json();
- const addr = data.address;
- if (addr) {
- const part1 = addr.province || addr.state || '';
- const part2 = addr.city || addr.town || addr.borough || addr.county || '';
- const part3 = addr.suburb || addr.neighbourhood || addr.village || '';
- const parts = [part1, part2, part3].filter(p => p !== '');
- if (parts.length > 1) {
- return \\ \\;
- } else if (parts.length === 1) {
- return parts[0];
- }
- }
- } catch (e) {
- console.warn('주소 변환 실패:', e);
- }
- return null;
-}
-function getWeatherMeta(code, temp) {
+    try {
+        const response = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + lat + "&lon=" + lon + "&accept-language=ko", {
+            headers: {
+                "User-Agent": "JejuVibeApp/1.0"
+            }
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const addr = data.address;
+        if (addr) {
+            const part1 = addr.province || addr.state || "";
+            const part2 = addr.city || addr.town || addr.borough || addr.county || "";
+            const part3 = addr.suburb || addr.neighbourhood || addr.village || "";
+            const parts = [part1, part2, part3].filter(p => p !== "");
+            if (parts.length > 1) {
+                return parts[parts.length-2] + " " + parts[parts.length-1];
+            } else if (parts.length === 1) {
+                return parts[0];
+            }
+        }
+    } catch (e) {
+        console.warn("주소 변환 실패:", e);
+    }
+    return null;
+}function getWeatherMeta(code, temp) {
     const rainyCodes = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
     const snowyCodes = [71, 73, 75, 77, 85, 86];
 
@@ -307,174 +306,131 @@ function getWeatherMeta(code, temp) {
     const isSummer = currentMonth >= 6 && currentMonth <= 8;
     const isWinter = currentMonth === 12 || currentMonth === 1 || currentMonth === 2;
 
-    let type = 'normal';
-    let iconClass = 'cloudy';
-    let iconHtml = '<i data-lucide=" cloud-sun\></i>';
- let desc = '선선한 날';
+    let type = "normal";
+    let iconClass = "cloudy";
+    let iconHtml = "<i data-lucide=\"cloud-sun\"></i>";
+    let desc = "선선한 날";
 
- if (rainyCodes.includes(code)) {
- type = 'rainy';
- iconClass = 'rainy';
- iconHtml = '<i data-lucide=\cloud-rain\></i>';
- desc = '비';
- } else if (snowyCodes.includes(code)) {
- if (isSummer) {
- type = 'rainy';
- iconClass = 'rainy';
- iconHtml = '<i data-lucide=\cloud-rain\></i>';
- desc = '비/소나기';
- } else {
- type = 'cold_snowy';
- iconClass = 'snowy';
- iconHtml = '<i data-lucide=\cloud-snow\></i>';
- desc = '눈';
- }
- } else if (temp !== undefined && temp < 5) {
- if (isSummer) {
- type = 'normal';
- iconClass = 'cloudy';
- iconHtml = '<i data-lucide=\cloud-sun\></i>';
- desc = '선선한 날';
- } else {
- type = 'cold_snowy';
- iconClass = 'snowy';
- iconHtml = '<i data-lucide=\thermometer-snowflake\></i>';
- desc = '매우 추움';
- }
- } else if (temp !== undefined && temp > 25) {
- if (isWinter) {
- type = 'normal';
- iconClass = 'cloudy';
- iconHtml = '<i data-lucide=\cloud-sun\></i>';
- desc = '선선한 날';
- } else {
- type = 'hot';
- iconClass = 'sunny';
- iconHtml = '<i data-lucide=\flame\></i>';
- desc = '무더위';
- }
- } else {
- type = 'normal';
- iconClass = 'cloudy';
- iconHtml = '<i data-lucide=\cloud-sun\></i>';
- desc = '선선한 날';
- }
+    if (rainyCodes.includes(code)) {
+        type = "rainy";
+        iconClass = "rainy";
+        iconHtml = "<i data-lucide=\"cloud-rain\"></i>";
+        desc = "비";
+    } else if (snowyCodes.includes(code)) {
+        if (isSummer) {
+            type = "rainy";
+            iconClass = "rainy";
+            iconHtml = "<i data-lucide=\"cloud-rain\"></i>";
+            desc = "비/소나기";
+        } else {
+            type = "cold_snowy";
+            iconClass = "snowy";
+            iconHtml = "<i data-lucide=\"cloud-snow\"></i>";
+            desc = "눈";
+        }
+    } else if (temp !== undefined && temp < 5) {
+        if (isSummer) {
+            type = "normal";
+            iconClass = "cloudy";
+            iconHtml = "<i data-lucide=\"cloud-sun\"></i>";
+            desc = "선선한 날";
+        } else {
+            type = "cold_snowy";
+            iconClass = "snowy";
+            iconHtml = "<i data-lucide=\"thermometer-snowflake\"></i>";
+            desc = "매우 추움";
+        }
+    } else if (temp !== undefined && temp > 25) {
+        if (isWinter) {
+            type = "normal";
+            iconClass = "cloudy";
+            iconHtml = "<i data-lucide=\"cloud-sun\"></i>";
+            desc = "선선한 날";
+        } else {
+            type = "hot";
+            iconClass = "sunny";
+            iconHtml = "<i data-lucide=\"flame\"></i>";
+            desc = "무더위";
+        }
+    } else {
+        type = "normal";
+        iconClass = "cloudy";
+        iconHtml = "<i data-lucide=\"cloud-sun\"></i>";
+        desc = "선선한 날";
+    }
 
- return { type, iconClass, iconHtml, desc };
+    return { type, iconClass, iconHtml, desc };
 }
 
 function initWeather() {
- if (!navigator.geolocation) {
- fetchWeather(37.5665, 126.9780, '서울');
- return;
- }
+    if (!navigator.geolocation) {
+        fetchWeather(37.5665, 126.9780, "서울");
+        return;
+    }
 
- navigator.geolocation.getCurrentPosition(
- async (position) => {
- const lat = position.coords.latitude;
- const lon = position.coords.longitude;
- let locationLabel = '현재 내 위치';
- const resolvedAddr = await getAddressFromCoords(lat, lon);
- if (resolvedAddr) {
- locationLabel = resolvedAddr;
- }
- fetchWeather(lat, lon, locationLabel);
- },
- (error) => {
- console.warn('Geolocation 실패', error);
- fetchWeather(37.5665, 126.9780, '서울 (위치 권한 미승인)');
- },
- { timeout: 8000 }
- );
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            let locationLabel = "현재 내 위치";
+            const resolvedAddr = await getAddressFromCoords(lat, lon);
+            if (resolvedAddr) {
+                locationLabel = resolvedAddr;
+            }
+            fetchWeather(lat, lon, locationLabel);
+        },
+        (error) => {
+            console.warn("Geolocation 실패", error);
+            fetchWeather(37.5665, 126.9780, "서울 (위치 권한 미승인)");
+        },
+        { timeout: 8000 }
+    );
 }
 
 async function fetchWeather(lat, lon, locationLabel) {
- try {
- const response = await fetch(\https://api.open-meteo.com/v1/forecast?latitude=\&longitude=\&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto\);
- if (!response.ok) throw new Error('날씨 에러');
- const data = await response.json();
- const current = data.current_weather;
- const temp = Math.round(current.temperature);
- const code = current.weathercode;
- const currentMeta = getWeatherMeta(code, temp);
- state.currentWeather = currentMeta.type;
- state.weatherInfo = { temp, description: currentMeta.desc };
+    try {
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto");
+        if (!response.ok) throw new Error("날씨 에러");
+        const data = await response.json();
+        const current = data.current_weather;
+        const temp = Math.round(current.temperature);
+        const code = current.weathercode;
+        const currentMeta = getWeatherMeta(code, temp);
+        state.currentWeather = currentMeta.type;
+        state.weatherInfo = { temp, description: currentMeta.desc };
 
- let dailyForecastHtml = '';
- if (data.daily) {
- const daily = data.daily;
- dailyForecastHtml = '<div class=\weather-forecast-3day\>';
- const labels = ['오늘', '내일', '모레'];
- for (let i = 0; i < 3; i++) {
- if (daily.time[i] !== undefined) {
- const dayCode = daily.weathercode[i];
- const minTemp = Math.round(daily.temperature_2m_min[i]);
- const maxTemp = Math.round(daily.temperature_2m_max[i]);
- const dayMeta = getWeatherMeta(dayCode);
- dailyForecastHtml += \
- <div class=\forecast-day\>
- <span class=\forecast-label\>\</span>
- <div class=\forecast-icon \\>
- \
- </div>
- <span class=\forecast-temp\>\°/\°</span>
- </div>
- \;
- }
- }
- dailyForecastHtml += '</div>';
- }
- renderWeatherCard(locationLabel, temp, currentMeta.desc, currentMeta.iconClass, currentMeta.iconHtml, dailyForecastHtml);
- } catch (err) {
- console.error(err);
- renderWeatherError();
- }
-}
-function renderWeatherCard(location, temp, desc, iconClass, iconHtml, dailyForecastHtml = "") {
+        let dailyForecastHtml = "";
+        if (data.daily) {
+            const daily = data.daily;
+            dailyForecastHtml = "<div class=\"weather-forecast-3day\">";
+            const labels = ["오늘", "내일", "모레"];
+            for (let i = 0; i < 3; i++) {
+                if (daily.time[i] !== undefined) {
+                    const dayCode = daily.weathercode[i];
+                    const minTemp = Math.round(daily.temperature_2m_min[i]);
+                    const maxTemp = Math.round(daily.temperature_2m_max[i]);
+                    const dayMeta = getWeatherMeta(dayCode);
+                    dailyForecastHtml += "<div class=\"forecast-day\"><span class=\"forecast-label\">" + labels[i] + "</span><div class=\"forecast-icon " + dayMeta.iconClass + "\">" + dayMeta.iconHtml + "</div><span class=\"forecast-temp\">" + minTemp + "°/" + maxTemp + "°</span></div>";
+                }
+            }
+            dailyForecastHtml += "</div>";
+        }
+        renderWeatherCard(locationLabel, temp, currentMeta.desc, currentMeta.iconClass, currentMeta.iconHtml, dailyForecastHtml);
+    } catch (err) {
+        console.error(err);
+        renderWeatherError();
+    }
+}function renderWeatherCard(location, temp, desc, iconClass, iconHtml, dailyForecastHtml = "") {
     const weatherCard = document.getElementById("weather-card");
     weatherCard.className = "weather-card";
-    weatherCard.innerHTML = `
-        <div class="weather-info">
-            <div class="weather-icon-container ${iconClass}">
-                ${iconHtml}
-            </div>
-            <div class="weather-text">
-                <div class="weather-location">
-                    <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
-                    <span>${location}</span>
-                </div>
-                <div class="weather-main">${desc}</div>
-            </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-            <div class="weather-temp">
-                ${temp}<span>°C</span>
-            </div>
-            ${dailyForecastHtml}
-        </div>
-    `;
+    weatherCard.innerHTML = "<div class=\"weather-info\"><div class=\"weather-icon-container " + iconClass + "\">" + iconHtml + "</div><div class=\"weather-text\"><div class=\"weather-location\"><i data-lucide=\"map-pin\" style=\"width: 14px; height: 14px;\"></i><span>" + location + "</span></div><div class=\"weather-main\">" + desc + "</div></div></div><div style=\"display: flex; align-items: center; gap: 16px; flex-wrap: wrap;\"><div class=\"weather-temp\">" + temp + "<span>°C</span></div>" + dailyForecastHtml + "</div>";
     lucide.createIcons();
 }
 
 function renderWeatherError() {
     const weatherCard = document.getElementById("weather-card");
     weatherCard.className = "weather-card";
-    weatherCard.innerHTML = `
-        <div class="weather-error-container">
-            <div class="weather-error-message">
-                <i data-lucide="alert-circle" style="color: var(--meat-color); vertical-align: middle; margin-right: 4px;"></i>
-                실시간 날씨를 불러오지 못했습니다. 날씨를 선택해 주세요:
-            </div>
-            <div class="weather-select-manual">
-                <select id="weather-manual-select">
-                    <option value="normal">맑음/보통</option>
-                    <option value="rainy">비 옴</option>
-                    <option value="cold_snowy">춥고 눈 옴</option>
-                    <option value="hot">매우 더움</option>
-                </select>
-            </div>
-        </div>
-    `;
+    weatherCard.innerHTML = "<div class=\"weather-error-container\"><div class=\"weather-error-message\"><i data-lucide=\"alert-circle\" style=\"color: var(--meat-color); vertical-align: middle; margin-right: 4px;\"></i>실시간 날씨를 불러오지 못했습니다. 날씨를 선택해 주세요:</div><div class=\"weather-select-manual\"><select id=\"weather-manual-select\"><option value=\"normal\">맑음/보통</option><option value=\"rainy\">비 옴</option><option value=\"cold_snowy\">춥고 눈 옴</option><option value=\"hot\">매우 더움</option></select></div></div>";
     lucide.createIcons();
     const select = document.getElementById("weather-manual-select");
     select.addEventListener("change", (e) => {
@@ -620,7 +576,7 @@ function replaceOneMenu(index) {
         const recipeUrl10000 = "https://www.10000recipe.com/recipe/list.html?q=" + encodeURIComponent(menu.name);
         const isDecided = state.shoppingList.some(item => item.menu === menu.name);
 
-        menuCard.innerHTML = "<div class="menu-card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;"><div><div class="menu-day">" + (index + 1) + "일차 저녁 추천</div><div class="menu-title">" + menu.name + "</div></div><div style="display: flex; gap: 8px; align-items: center;"><button class="btn-change-one btn-secondary" data-index="" + index + "" style="padding: 6px; border-radius: var(--sketch-radius-sm); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0px 0px var(--border-color); border: 2px solid var(--border-color); background: #f1f5f9;" title="이 날의 메뉴 변경하기"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button><button class="btn-decide " + (isDecided ? "decided" : "") + "" data-menu="" + menu.name + ""><i data-lucide="" + (isDecided ? "check-circle-2" : "circle") + ""></i><span>" + (isDecided ? "선택 완료" : "메뉴결정") + "</span></button></div></div><div class="menu-ingredients">" + ownedInMenu.map(n => "<span class="ing-badge owned">" + n + " (있음)</span>").join("") + " " + missingInMenu.map(n => "<span class="ing-badge missing">" + n + " (필요)</span>").join("") + " " + menu.others.map(n => "<span class="ing-badge condiment">" + n + "</span>").join("") + "</div><div class="recipe-links-container" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"><a href="" + recipeUrl10000 + "" target="_blank" rel="noopener noreferrer" class="recipe-link"><i data-lucide="external-link" style="width: 14px; height: 14px;"></i>'만개의 레시피'에서 레시피 확인하기</a></div>";
+        menuCard.innerHTML = "<div class=\"menu-card-header\" style=\"display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;\"><div><div class=\"menu-day\">" + (index + 1) + "일차 저녁 추천</div><div class=\"menu-title\">" + menu.name + "</div></div><div style=\"display: flex; gap: 8px; align-items: center;\"><button class=\"btn-change-one btn-secondary\" data-index=\"" + index + "\" style=\"padding: 6px; border-radius: var(--sketch-radius-sm); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0px 0px var(--border-color); border: 2px solid var(--border-color); background: #f1f5f9;\" title=\"이 날의 메뉴 변경하기\"><i data-lucide=\"refresh-cw\" style=\"width: 16px; height: 16px;\"></i></button><button class=\"btn-decide " + (isDecided ? "decided" : "") + "\" data-menu=\"" + menu.name + "\"><i data-lucide=\"" + (isDecided ? "check-circle-2" : "circle") + "\"></i><span>" + (isDecided ? "선택 완료" : "메뉴결정") + "</span></button></div></div><div class=\"menu-ingredients\">" + ownedInMenu.map(n => "<span class=\"ing-badge owned\">" + n + " (있음)</span>").join("") + " " + missingInMenu.map(n => "<span class=\"ing-badge missing\">" + n + " (필요)</span>").join("") + " " + menu.others.map(n => "<span class=\"ing-badge condiment\">" + n + "</span>").join("") + "</div><div class=\"recipe-links-container\" style=\"display: flex; flex-direction: column; gap: 6px; margin-top: 4px;\"><a href=\"" + recipeUrl10000 + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"recipe-link\"><i data-lucide=\"external-link\" style=\"width: 14px; height: 14px;\"></i>'만개의 레시피'에서 레시피 확인하기</a></div>";
 
         menuCard.querySelector('.btn-change-one').addEventListener('click', () => {
             replaceOneMenu(index);
@@ -631,7 +587,9 @@ function replaceOneMenu(index) {
         recListDiv.appendChild(menuCard);
     });
     lucide.createIcons();
-}function toggleMenuDecision(menu, buttonElement, missingIngredients) {
+}
+
+function toggleMenuDecision(menu, buttonElement, missingIngredients) {
     const isCurrentlyDecided = buttonElement.classList.contains('decided');
     if (isCurrentlyDecided) {
         state.shoppingList = state.shoppingList.filter(item => item.menu !== menu.name);
@@ -687,7 +645,7 @@ function renderShoppingList() {
     state.shoppingList.forEach(item => {
         const li = document.createElement('li');
         li.className = 'shopping-item ' + (item.checked ? 'checked' : '');
-        li.innerHTML = "<div class="shopping-item-left"><div class="shopping-checkbox " + (item.checked ? "checked" : "") + "">" + (item.checked ? "<i data-lucide="check" style="width: 12px; height: 12px;"></i>" : "") + "</div><div><span class="shopping-item-name">" + item.name + "</span><span class="shopping-item-menu">(" + item.menu + ")</span></div></div><i data-lucide="x" class="shopping-item-delete" style="cursor: pointer; width: 16px; height: 16px; color: var(--text-muted);"></i>";
+        li.innerHTML = "<div class=\"shopping-item-left\"><div class=\"shopping-checkbox " + (item.checked ? "checked" : "") + "\">" + (item.checked ? "<i data-lucide=\"check\" style=\"width: 12px; height: 12px;\"></i>" : "") + "</div><div><span class=\"shopping-item-name\">" + item.name + "</span><span class=\"shopping-item-menu\">(" + item.menu + ")</span></div></div><i data-lucide=\"x\" class=\"shopping-item-delete\" style=\"cursor: pointer; width: 16px; height: 16px; color: var(--text-muted);\"></i>";
 
         li.querySelector('.shopping-checkbox').addEventListener('click', () => {
             item.checked = !item.checked;

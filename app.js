@@ -700,9 +700,12 @@ function recommendMenus() {
     // 1. 현재 날씨 테마에 부합하는 메뉴들 우선 필터링
     const weatherMenus = MENU_DATABASE.filter(m => m.weather === state.currentWeather);
     
+    // 무작위로 셔플을 먼저 실행하여 매칭 점수가 동률일 때 누를 때마다 다른 식단이 나오게 합니다.
+    const shuffledWeatherMenus = [...weatherMenus].sort(() => Math.random() - 0.5);
+    
     // 2. 각 메뉴별로 보유 재료 매칭율 스코어링
     // 보유한 재료가 많을수록 매칭 스코어가 높아짐
-    weatherMenus.forEach(menu => {
+    shuffledWeatherMenus.forEach(menu => {
         let matchCount = 0;
         const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
         
@@ -715,15 +718,16 @@ function recommendMenus() {
     });
 
     // 점수 높은 순 정렬
-    weatherMenus.sort((a, b) => b.score - a.score);
+    shuffledWeatherMenus.sort((a, b) => b.score - a.score);
 
     // 2~3일치 메뉴 제안을 위해 최대 3개 아이템 선택 (메뉴 데이터가 부족할 경우 전체 메뉴에서 서브 매칭)
-    let finalRecommendations = [...weatherMenus];
+    let finalRecommendations = [...shuffledWeatherMenus];
     
     if (finalRecommendations.length < 3) {
         // 날씨가 다른 메뉴 중에서도 보유 재료와 가장 잘 맞는 품목을 채워서 3일을 만듦
         const remainingMenus = MENU_DATABASE.filter(m => m.weather !== state.currentWeather);
-        remainingMenus.forEach(menu => {
+        const shuffledRemaining = [...remainingMenus].sort(() => Math.random() - 0.5);
+        shuffledRemaining.forEach(menu => {
             let matchCount = 0;
             const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
             totalReq.forEach(req => {
@@ -731,10 +735,10 @@ function recommendMenus() {
             });
             menu.score = matchCount;
         });
-        remainingMenus.sort((a, b) => b.score - a.score);
+        shuffledRemaining.sort((a, b) => b.score - a.score);
         
-        while (finalRecommendations.length < 3 && remainingMenus.length > 0) {
-            finalRecommendations.push(remainingMenus.shift());
+        while (finalRecommendations.length < 3 && shuffledRemaining.length > 0) {
+            finalRecommendations.push(shuffledRemaining.shift());
         }
     }
 
@@ -755,9 +759,9 @@ function recommendMenus() {
         const ownedInMenu = totalVegAndMeat.filter(name => ownedNames.includes(name));
         const missingInMenu = totalVegAndMeat.filter(name => !ownedNames.includes(name));
 
-        // 레시피 아웃링크 생성 (만개의 레시피, 새미네부엌)
+        // 레시피 아웃링크 생성 (만개의 레시피, 새미네부엌 상세 검색)
         const recipeUrl10000 = `https://www.10000recipe.com/recipe/list.html?q=${encodeURIComponent(menu.name)}`;
-        const recipeUrlSemie = `https://semie.cooking/search?q=${encodeURIComponent(menu.name)}`;
+        const recipeUrlSemie = `https://semie.cooking/search/a/${encodeURIComponent(menu.name)}`;
 
         // 결정 유무 체크
         const isDecided = state.shoppingList.some(item => item.menu === menu.name);
@@ -800,6 +804,15 @@ function recommendMenus() {
 
         recListDiv.appendChild(menuCard);
     });
+
+    // 다른 메뉴 추천받기 (재추천) 버튼 추가
+    const reRecommendBtn = document.createElement('button');
+    reRecommendBtn.className = 'btn btn-secondary btn-block';
+    reRecommendBtn.style.marginTop = '20px';
+    reRecommendBtn.style.boxShadow = '2px 2px 0px 0px var(--border-color)';
+    reRecommendBtn.innerHTML = `<i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i> 다른 식단 추천받기`;
+    reRecommendBtn.addEventListener('click', recommendMenus);
+    recListDiv.appendChild(reRecommendBtn);
 
     lucide.createIcons();
 }

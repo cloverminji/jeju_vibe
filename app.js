@@ -469,21 +469,95 @@ function toggleIngredient(id, cardElement) {
     saveIngredientsToLocalStorage();
 }
 
+// 주소 변환 (역지오코딩)
+async function getAddressFromCoords(lat, lon) {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`, {
+            headers: {
+                'User-Agent': 'JejuVibeApp/1.0 (cloverminji@github.com)'
+            }
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const addr = data.address;
+        if (addr) {
+            const part1 = addr.province || addr.state || '';
+            const part2 = addr.city || addr.town || addr.borough || addr.county || '';
+            const part3 = addr.suburb || addr.neighbourhood || addr.village || '';
+            const parts = [part1, part2, part3].filter(p => p !== '');
+            if (parts.length > 1) {
+                return `${parts[parts.length-2]} ${parts[parts.length-1]}`;
+            } else if (parts.length === 1) {
+                return parts[0];
+            }
+        }
+    } catch (e) {
+        console.warn('주소 변환 실패:', e);
+    }
+    return null;
+}
+
+// 날씨 코드에 매칭되는 아이콘 및 설명 반환
+function getWeatherMeta(code, temp) {
+    const rainyCodes = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+    const snowyCodes = [71, 73, 75, 77, 85, 86];
+
+    let type = 'normal';
+    let iconClass = 'cloudy';
+    let iconHtml = '<i data-lucide="cloud-sun"></i>';
+    let desc = '맑음/흐림';
+
+    if (rainyCodes.includes(code)) {
+        type = 'rainy';
+        iconClass = 'rainy';
+        iconHtml = '<i data-lucide="cloud-rain"></i>';
+        desc = '비';
+    } else if (snowyCodes.includes(code)) {
+        type = 'cold_snowy';
+        iconClass = 'snowy';
+        iconHtml = '<i data-lucide="cloud-snow"></i>';
+        desc = '눈';
+    } else if (temp !== undefined && temp < 5) {
+        type = 'cold_snowy';
+        iconClass = 'snowy';
+        iconHtml = '<i data-lucide="thermometer-snowflake"></i>';
+        desc = '매우 추움';
+    } else if (temp !== undefined && temp > 25) {
+        type = 'hot';
+        iconClass = 'sunny';
+        iconHtml = '<i data-lucide="flame"></i>';
+        desc = '무더위';
+    } else {
+        type = 'normal';
+        iconClass = 'cloudy';
+        iconHtml = '<i data-lucide="cloud-sun"></i>';
+        desc = '선선한 날';
+    }
+
+    return { type, iconClass, iconHtml, desc };
+}
+
 // 날씨 정보 초기화 (위치 기반 조회)
 function initWeather() {
-    const weatherCard = document.getElementById('weather-card');
-    
     if (!navigator.geolocation) {
         // Geolocation을 지원하지 않는 경우 서울 날씨를 기본값으로 세팅
-        fetchWeather(37.5665, 126.9780, '서울 (기본 위치)');
+        fetchWeather(37.5665, 126.9780, '서울');
         return;
     }
 
     navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            fetchWeather(lat, lon, '현재 내 위치');
+            let locationLabel = '현재 내 위치';
+            
+            // 좌표를 한글 주소로 변환
+            const resolvedAddr = await getAddressFromCoords(lat, lon);
+            if (resolvedAddr) {
+                locationLabel = resolvedAddr;
+            }
+            
+            fetchWeather(lat, lon, locationLabel);
         },
         (error) => {
             console.warn('Geolocation 권한이 거부되었거나 획득에 실패했습니다. 기본 위치로 날씨를 조회합니다.', error);
@@ -496,10 +570,8 @@ function initWeather() {
 
 // Open-Meteo API 호출하여 날씨 데이터 연동
 async function fetchWeather(lat, lon, locationLabel) {
-    const weatherCard = document.getElementById('weather-card');
-    
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`);
         if (!response.ok) throw new Error('날씨 데이터를 가져오는 중 서버 에러가 발생했습니다.');
         
         const data = await response.json();
@@ -508,49 +580,40 @@ async function fetchWeather(lat, lon, locationLabel) {
         const temp = Math.round(current.temperature);
         const code = current.weathercode;
         
-        // 날씨 룰 해석
-        let weatherType = 'normal';
-        let iconClass = 'sunny';
-        let iconHtml = '<i data-lucide="sun"></i>';
-        let desc = '맑음/흐림';
+        // 오늘 날씨 룰 해석
+        const currentMeta = getWeatherMeta(code, temp);
 
-        // Open-Meteo Weather Codes
-        // 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82: 비(Drizzle, Rain, Rain showers)
-        // 71, 73, 75, 77, 85, 86: 눈(Snow fall, Snow showers)
-        const rainyCodes = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82];
-        const snowyCodes = [71, 73, 75, 77, 85, 86];
+        state.currentWeather = currentMeta.type;
+        state.weatherInfo = { temp, description: currentMeta.desc };
 
-        if (rainyCodes.includes(code)) {
-            weatherType = 'rainy';
-            iconClass = 'rainy';
-            iconHtml = '<i data-lucide="cloud-rain"></i>';
-            desc = '비가 내리는 중';
-        } else if (snowyCodes.includes(code)) {
-            weatherType = 'cold_snowy';
-            iconClass = 'snowy';
-            iconHtml = '<i data-lucide="cloud-snow"></i>';
-            desc = '눈이 내리는 중';
-        } else if (temp < 5) {
-            weatherType = 'cold_snowy';
-            iconClass = 'snowy';
-            iconHtml = '<i data-lucide="thermometer-snowflake"></i>';
-            desc = '매우 추운 날';
-        } else if (temp > 25) {
-            weatherType = 'hot';
-            iconClass = 'sunny';
-            iconHtml = '<i data-lucide="flame"></i>';
-            desc = '무더운 날';
-        } else {
-            weatherType = 'normal';
-            iconClass = 'cloudy';
-            iconHtml = '<i data-lucide="cloud-sun"></i>';
-            desc = '선선하고 좋은 날';
+        // 3일 예보 HTML 생성
+        let dailyForecastHtml = '';
+        if (data.daily) {
+            const daily = data.daily;
+            dailyForecastHtml = '<div class="weather-forecast-3day">';
+            const labels = ['오늘', '내일', '모레'];
+            for (let i = 0; i < 3; i++) {
+                if (daily.time[i] !== undefined) {
+                    const dayCode = daily.weathercode[i];
+                    const minTemp = Math.round(daily.temperature_2m_min[i]);
+                    const maxTemp = Math.round(daily.temperature_2m_max[i]);
+                    const dayMeta = getWeatherMeta(dayCode);
+
+                    dailyForecastHtml += `
+                        <div class="forecast-day">
+                            <span class="forecast-label">${labels[i]}</span>
+                            <div class="forecast-icon ${dayMeta.iconClass}">
+                                ${dayMeta.iconHtml}
+                            </div>
+                            <span class="forecast-temp">${minTemp}°/${maxTemp}°</span>
+                        </div>
+                    `;
+                }
+            }
+            dailyForecastHtml += '</div>';
         }
 
-        state.currentWeather = weatherType;
-        state.weatherInfo = { temp, description: desc };
-
-        renderWeatherCard(locationLabel, temp, desc, iconClass, iconHtml);
+        renderWeatherCard(locationLabel, temp, currentMeta.desc, currentMeta.iconClass, currentMeta.iconHtml, dailyForecastHtml);
     } catch (err) {
         console.error('날씨 API 오류:', err);
         renderWeatherError();
@@ -558,7 +621,7 @@ async function fetchWeather(lat, lon, locationLabel) {
 }
 
 // 날씨 정보 카드 렌더링
-function renderWeatherCard(location, temp, desc, iconClass, iconHtml) {
+function renderWeatherCard(location, temp, desc, iconClass, iconHtml, dailyForecastHtml = '') {
     const weatherCard = document.getElementById('weather-card');
     weatherCard.className = 'weather-card';
     weatherCard.innerHTML = `
@@ -574,8 +637,11 @@ function renderWeatherCard(location, temp, desc, iconClass, iconHtml) {
                 <div class="weather-main">${desc}</div>
             </div>
         </div>
-        <div class="weather-temp">
-            ${temp}<span>°C</span>
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div class="weather-temp">
+                ${temp}<span>°C</span>
+            </div>
+            ${dailyForecastHtml}
         </div>
     `;
     lucide.createIcons();

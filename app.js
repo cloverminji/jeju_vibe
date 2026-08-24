@@ -116,7 +116,8 @@ const MENU_DATABASE = [
         requiredVeg: ['양파', '파'],
         requiredMeat: [],
         others: ['밥', '스팸', '계란', '마요네즈'],
-        score: 0
+        score: 0,
+        noSemie: true
     },
     {
         name: '돼지고기 가지덮밥',
@@ -256,7 +257,8 @@ const MENU_DATABASE = [
         requiredVeg: ['파'],
         requiredMeat: [],
         others: ['밥', '계란프라이', '간장', '참기름'],
-        score: 0
+        score: 0,
+        noSemie: true
     },
     {
         name: '돼지고기 샐러드',
@@ -264,7 +266,8 @@ const MENU_DATABASE = [
         requiredVeg: ['양배추', '양파'],
         requiredMeat: ['돼지고기'],
         others: ['참깨드레싱'],
-        score: 0
+        score: 0,
+        noSemie: true
     },
     {
         name: '한입 소고기 유부초밥',
@@ -338,7 +341,8 @@ const MENU_DATABASE = [
         requiredVeg: ['양파'],
         requiredMeat: [],
         others: ['훈제연어', '초밥용 밥', '홀스래디쉬소스'],
-        score: 0
+        score: 0,
+        noSemie: true
     },
     {
         name: '소고기 야채 비빔밥',
@@ -403,7 +407,8 @@ const state = {
     currentWeather: 'normal', // 'rainy' | 'cold_snowy' | 'hot' | 'normal'
     weatherInfo: { temp: 20, description: '맑음' },
     selectedIngredients: new Set(),
-    shoppingList: [] // { id, name, menu, checked }
+    shoppingList: [], // { id, name, menu, checked }
+    recommendedMenus: [] // 현재 화면에 추천된 3가지 메뉴를 저장
 };
 
 // DOM 로딩 완료 시 초기화
@@ -687,9 +692,6 @@ function initEventListeners() {
 
 // 메뉴 추천 알고리즘 (2~3일 메뉴 목록 도출)
 function recommendMenus() {
-    const recListDiv = document.getElementById('recommendation-list');
-    const recPlaceholder = document.getElementById('recommendation-placeholder');
-    
     // 사용자가 체크한 보유 재료 한글 이름 배열 구하기
     const ownedNames = [];
     state.selectedIngredients.forEach(id => {
@@ -742,15 +744,82 @@ function recommendMenus() {
         }
     }
 
-    // 최종 3개만 추천
-    finalRecommendations = finalRecommendations.slice(0, 3);
+    state.recommendedMenus = finalRecommendations.slice(0, 3);
+    renderRecommendations();
+}
 
-    // 화면 렌더링
+// 개별 메뉴 1개 변경 기능
+function replaceOneMenu(index) {
+    const ownedNames = [];
+    state.selectedIngredients.forEach(id => {
+        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS].find(i => i.id === id);
+        if (item) ownedNames.push(item.name);
+    });
+
+    // 현재 추천된 메뉴들의 이름 모음 (중복 추천 방지)
+    const currentMenuNames = state.recommendedMenus.map(m => m.name);
+
+    // 1. 현재 날씨에 맞는 메뉴 중 현재 추천 리스트에 없는 메뉴 필터링
+    let candidates = MENU_DATABASE.filter(m => m.weather === state.currentWeather && !currentMenuNames.includes(m.name));
+    
+    // 셔플 및 스코어 계산
+    candidates = candidates.sort(() => Math.random() - 0.5);
+    candidates.forEach(menu => {
+        let matchCount = 0;
+        const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
+        totalReq.forEach(req => {
+            if (ownedNames.includes(req)) matchCount += 2;
+        });
+        menu.score = matchCount;
+    });
+    candidates.sort((a, b) => b.score - a.score);
+
+    // 만약 후보가 없다면, 다른 날씨 메뉴 중 추천 리스트에 없는 메뉴 필터링
+    if (candidates.length === 0) {
+        let otherCandidates = MENU_DATABASE.filter(m => m.weather !== state.currentWeather && !currentMenuNames.includes(m.name));
+        otherCandidates = otherCandidates.sort(() => Math.random() - 0.5);
+        otherCandidates.forEach(menu => {
+            let matchCount = 0;
+            const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
+            totalReq.forEach(req => {
+                if (ownedNames.includes(req)) matchCount += 1.5;
+            });
+            menu.score = matchCount;
+        });
+        otherCandidates.sort((a, b) => b.score - a.score);
+        candidates = otherCandidates;
+    }
+
+    // 새로운 메뉴로 교체
+    if (candidates.length > 0) {
+        // 기존에 이 메뉴로 인해 담겨있던 장보기 품목을 안전하게 비우기 위해 메뉴결정 해제 처리
+        const oldMenu = state.recommendedMenus[index];
+        state.shoppingList = state.shoppingList.filter(item => item.menu !== oldMenu.name);
+        saveShoppingToLocalStorage();
+        renderShoppingList();
+
+        state.recommendedMenus[index] = candidates[0];
+        renderRecommendations();
+        updateDecideButtons();
+    }
+}
+
+// 추천 식단 화면 렌더링
+function renderRecommendations() {
+    const recListDiv = document.getElementById('recommendation-list');
+    const recPlaceholder = document.getElementById('recommendation-placeholder');
+    
+    const ownedNames = [];
+    state.selectedIngredients.forEach(id => {
+        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS].find(i => i.id === id);
+        if (item) ownedNames.push(item.name);
+    });
+
     recPlaceholder.classList.add('hide');
     recListDiv.classList.remove('hide');
     recListDiv.innerHTML = '';
 
-    finalRecommendations.forEach((menu, index) => {
+    state.recommendedMenus.forEach((menu, index) => {
         const menuCard = document.createElement('div');
         menuCard.className = 'menu-card';
         
@@ -766,16 +835,30 @@ function recommendMenus() {
         // 결정 유무 체크
         const isDecided = state.shoppingList.some(item => item.menu === menu.name);
 
+        const semieLinkHtml = menu.noSemie 
+            ? '' 
+            : `
+                <a href="${recipeUrlSemie}" target="_blank" rel="noopener noreferrer" class="recipe-link">
+                    <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> 
+                    '새미네부엌'에서 레시피 확인하기
+                </a>
+            `;
+
         menuCard.innerHTML = `
-            <div class="menu-card-header">
+            <div class="menu-card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
                 <div>
                     <div class="menu-day">${index + 1}일차 저녁 추천</div>
                     <div class="menu-title">${menu.name}</div>
                 </div>
-                <button class="btn-decide ${isDecided ? 'decided' : ''}" data-menu="${menu.name}">
-                    <i data-lucide="${isDecided ? 'check-circle-2' : 'circle'}"></i> 
-                    <span>${isDecided ? '선택 완료' : '식단 결정'}</span>
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-change-one btn-secondary" data-index="${index}" style="padding: 6px; border-radius: var(--sketch-radius-sm); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0px 0px var(--border-color); border: 2px solid var(--border-color); background: #f1f5f9;" title="이 날의 메뉴 변경하기">
+                        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    <button class="btn-decide ${isDecided ? 'decided' : ''}" data-menu="${menu.name}">
+                        <i data-lucide="${isDecided ? 'check-circle-2' : 'circle'}"></i> 
+                        <span>${isDecided ? '선택 완료' : '메뉴결정'}</span>
+                    </button>
+                </div>
             </div>
             
             <div class="menu-ingredients">
@@ -789,14 +872,16 @@ function recommendMenus() {
                     <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> 
                     '만개의 레시피'에서 레시피 확인하기
                 </a>
-                <a href="${recipeUrlSemie}" target="_blank" rel="noopener noreferrer" class="recipe-link">
-                    <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> 
-                    '새미네부엌'에서 레시피 확인하기
-                </a>
+                ${semieLinkHtml}
             </div>
         `;
 
-        // 식단 결정 버튼 이벤트
+        // 이 날의 메뉴 개별 변경 버튼 이벤트
+        menuCard.querySelector('.btn-change-one').addEventListener('click', () => {
+            replaceOneMenu(index);
+        });
+
+        // 메뉴 결정 버튼 이벤트
         menuCard.querySelector('.btn-decide').addEventListener('click', (e) => {
             const btn = e.currentTarget;
             toggleMenuDecision(menu, btn, missingInMenu);
@@ -804,15 +889,6 @@ function recommendMenus() {
 
         recListDiv.appendChild(menuCard);
     });
-
-    // 다른 메뉴 추천받기 (재추천) 버튼 추가
-    const reRecommendBtn = document.createElement('button');
-    reRecommendBtn.className = 'btn btn-secondary btn-block';
-    reRecommendBtn.style.marginTop = '20px';
-    reRecommendBtn.style.boxShadow = '2px 2px 0px 0px var(--border-color)';
-    reRecommendBtn.innerHTML = `<i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i> 다른 식단 추천받기`;
-    reRecommendBtn.addEventListener('click', recommendMenus);
-    recListDiv.appendChild(reRecommendBtn);
 
     lucide.createIcons();
 }
@@ -825,7 +901,7 @@ function toggleMenuDecision(menu, buttonElement, missingIngredients) {
         // 이미 결정된 메뉴이면 구매 리스트에서 이 메뉴로 인해 추가된 항목 제거
         state.shoppingList = state.shoppingList.filter(item => item.menu !== menu.name);
         buttonElement.classList.remove('decided');
-        buttonElement.querySelector('span').textContent = '식단 결정';
+        buttonElement.querySelector('span').textContent = '메뉴결정';
         
         const iconEl = buttonElement.querySelector('i, svg');
         if (iconEl) {
@@ -927,7 +1003,7 @@ function updateDecideButtons() {
         const stillInList = state.shoppingList.some(item => item.menu === menuName);
         if (!stillInList) {
             btn.classList.remove('decided');
-            btn.querySelector('span').textContent = '식단 결정';
+            btn.querySelector('span').textContent = '메뉴결정';
             
             const iconEl = btn.querySelector('i, svg');
             if (iconEl) {

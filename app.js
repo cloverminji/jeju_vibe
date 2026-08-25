@@ -847,6 +847,10 @@ function initEventListeners() {
                     if (menu.name.includes('냉')) {
                         weatherAdjustment += 8.0;
                     }
+                    // 무더운 날: 볶음 요리이면서 술안주 또는 초스피드 요리인 경우 보너스 부여 (국/탕/찌개 감점인 -10의 1.5배인 +15.0)
+                    if (menu.tags.method === '볶음' && (menu.tags.situation === '술안주' || menu.tags.situation === '초스피드')) {
+                        weatherAdjustment += 15.0;
+                    }
                 }
 
                 let ingredientScore = 0;
@@ -933,6 +937,10 @@ function replaceOneMenu(index) {
                 // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (완화: +8)
                 if (menu.name.includes('냉')) {
                     weatherAdjustment += 8.0;
+                }
+                // 무더운 날: 볶음 요리이면서 술안주 또는 초스피드 요리인 경우 보너스 부여 (국/탕/찌개 감점인 -10의 1.5배인 +15.0)
+                if (menu.tags.method === '볶음' && (menu.tags.situation === '술안주' || menu.tags.situation === '초스피드')) {
+                    weatherAdjustment += 15.0;
                 }
             }
 

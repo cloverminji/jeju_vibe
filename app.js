@@ -506,6 +506,33 @@ const MENU_DATABASE = [
         requiredSeafood: ['새우'],
         others: ['아보카도', '샐러드드레싱', '올리브유'],
         score: 0
+    },
+    {
+        name: '토마토 바질 냉파스타',
+        tags: { type: '퓨전', situation: '초스피드', method: '무침', ingredient: '채소류' },
+        requiredVeg: ['양파', '버섯'],
+        requiredMeat: [],
+        requiredSeafood: ['새우'],
+        others: ['푸실리/스파게티면', '방울토마토', '바질페스토', '올리브유'],
+        score: 0
+    },
+    {
+        name: '닭가슴살 겨자 냉무침',
+        tags: { type: '샐러드', situation: '다이어트', method: '무침', ingredient: '닭고기' },
+        requiredVeg: ['양배추', '당근', '양파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['겨자소스', '식초', '설탕'],
+        score: 0
+    },
+    {
+        name: '오징어 미나리 냉무침',
+        tags: { type: '메인반찬', situation: '술안주', method: '무침', ingredient: '해물류' },
+        requiredVeg: ['양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: ['오징어'],
+        others: ['미나리/오이', '초고추장', '통깨'],
+        score: 0
     }
 ];
 
@@ -816,6 +843,10 @@ function initEventListeners() {
                     if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', '무침'].includes(menu.tags.method)) {
                         weatherAdjustment += 15.0;
                     }
+                    // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (+20)
+                    if (menu.name.includes('냉')) {
+                        weatherAdjustment += 20.0;
+                    }
                 }
 
                 let ingredientScore = 0;
@@ -898,6 +929,10 @@ function replaceOneMenu(index) {
                 // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (+15)
                 if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', 'mu침', '무침'].includes(menu.tags.method)) {
                     weatherAdjustment += 15.0;
+                }
+                // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (+20)
+                if (menu.name.includes('냉')) {
+                    weatherAdjustment += 20.0;
                 }
             }
 

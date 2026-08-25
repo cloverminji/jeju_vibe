@@ -826,26 +826,26 @@ function initEventListeners() {
 
                 let weatherAdjustment = 0;
                 if (dayWeather === 'rainy') {
-                    // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (+30)
+                    // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (완화: +12)
                     if (menu.tags.type === '부침' || menu.tags.method === '부침') {
-                        weatherAdjustment += 30.0;
+                        weatherAdjustment += 12.0;
                     }
                 } else if (dayWeather === 'hot') {
-                    // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 강력한 디버프 부여 (-30)
+                    // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 디버프 부여 (완화: -10)
                     if (['국/탕', '찌개'].includes(menu.tags.type) || menu.tags.method === '끓이기') {
-                        weatherAdjustment -= 30.0;
+                        weatherAdjustment -= 10.0;
                     }
-                    // 무더운 날: 부침(전) 요리도 제외/축소 (-20)
+                    // 무더운 날: 부침(전) 요리도 제외/축소 (완화: -8)
                     if (menu.tags.type === '부침' || menu.tags.method === '부침') {
-                        weatherAdjustment -= 20.0;
+                        weatherAdjustment -= 8.0;
                     }
-                    // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (+15)
+                    // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (완화: +6)
                     if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', '무침'].includes(menu.tags.method)) {
-                        weatherAdjustment += 15.0;
+                        weatherAdjustment += 6.0;
                     }
-                    // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (+20)
+                    // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (완화: +8)
                     if (menu.name.includes('냉')) {
-                        weatherAdjustment += 20.0;
+                        weatherAdjustment += 8.0;
                     }
                 }
 
@@ -913,26 +913,26 @@ function replaceOneMenu(index) {
 
             let weatherAdjustment = 0;
             if (dayWeather === 'rainy') {
-                // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (+30)
+                // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (완화: +12)
                 if (menu.tags.type === '부침' || menu.tags.method === '부침') {
-                    weatherAdjustment += 30.0;
+                    weatherAdjustment += 12.0;
                 }
             } else if (dayWeather === 'hot') {
-                // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 강력한 디버프 부여 (-30)
+                // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 디버프 부여 (완화: -10)
                 if (['국/탕', '찌개'].includes(menu.tags.type) || menu.tags.method === '끓이기') {
-                    weatherAdjustment -= 30.0;
+                    weatherAdjustment -= 10.0;
                 }
-                // 무더운 날: 부침(전) 요리도 제외/축소 (-20)
+                // 무더운 날: 부침(전) 요리도 제외/축소 (완화: -8)
                 if (menu.tags.type === '부침' || menu.tags.method === '부침') {
-                    weatherAdjustment -= 20.0;
+                    weatherAdjustment -= 8.0;
                 }
-                // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (+15)
+                // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (완화: +6)
                 if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', 'mu침', '무침'].includes(menu.tags.method)) {
-                    weatherAdjustment += 15.0;
+                    weatherAdjustment += 6.0;
                 }
-                // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (+20)
+                // 무더운 날: 명사/형용사 '냉'이 이름에 들어간 시원한 요리에 특별 보너스 부여 (완화: +8)
                 if (menu.name.includes('냉')) {
-                    weatherAdjustment += 20.0;
+                    weatherAdjustment += 8.0;
                 }
             }
 

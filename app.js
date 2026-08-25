@@ -514,7 +514,7 @@ const WEATHER_TAG_RULES = {
         types: ['국/탕', '찌개', '부침', '튀김류', '퓨전'],
         situations: ['해장', '술안주', '야식', '일상'],
         methods: ['부침', '튀김', '조림', '끓이기'],
-        weights: { type: 2.0, situation: 1.5, method: 1.0 }
+        weights: { type: 6.0, situation: 2.0, method: 4.0 }
     },
     cold_snowy: {
         types: ['국/탕', '찌개', '밥/죽/떡', '퓨전'],

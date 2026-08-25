@@ -797,6 +797,27 @@ function initEventListeners() {
                 if (rule.situations.includes(menu.tags.situation)) tagScore += rule.weights.situation;
                 if (rule.methods.includes(menu.tags.method)) tagScore += rule.weights.method;
 
+                let weatherAdjustment = 0;
+                if (dayWeather === 'rainy') {
+                    // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (+30)
+                    if (menu.tags.type === '부침' || menu.tags.method === '부침') {
+                        weatherAdjustment += 30.0;
+                    }
+                } else if (dayWeather === 'hot') {
+                    // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 강력한 디버프 부여 (-30)
+                    if (['국/탕', '찌개'].includes(menu.tags.type) || menu.tags.method === '끓이기') {
+                        weatherAdjustment -= 30.0;
+                    }
+                    // 무더운 날: 부침(전) 요리도 제외/축소 (-20)
+                    if (menu.tags.type === '부침' || menu.tags.method === '부침') {
+                        weatherAdjustment -= 20.0;
+                    }
+                    // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (+15)
+                    if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', '무침'].includes(menu.tags.method)) {
+                        weatherAdjustment += 15.0;
+                    }
+                }
+
                 let ingredientScore = 0;
                 const totalReq = [...menu.requiredVeg, ...menu.requiredMeat, ...(menu.requiredSeafood || [])];
                 totalReq.forEach(req => {
@@ -809,7 +830,7 @@ function initEventListeners() {
 
                 return {
                     ...menu,
-                    score: tagScore + ingredientScore + penaltyScore
+                    score: tagScore + weatherAdjustment + ingredientScore + penaltyScore
                 };
             });
 
@@ -859,6 +880,27 @@ function replaceOneMenu(index) {
             if (rule.situations.includes(menu.tags.situation)) tagScore += rule.weights.situation;
             if (rule.methods.includes(menu.tags.method)) tagScore += rule.weights.method;
 
+            let weatherAdjustment = 0;
+            if (dayWeather === 'rainy') {
+                // 비 오는 날: 전/부침 요리 최우선 가중치 부여 (+30)
+                if (menu.tags.type === '부침' || menu.tags.method === '부침') {
+                    weatherAdjustment += 30.0;
+                }
+            } else if (dayWeather === 'hot') {
+                // 무더운 날: 국/탕/찌개 요리 및 끓이기 조리법에 강력한 디버프 부여 (-30)
+                if (['국/탕', '찌개'].includes(menu.tags.type) || menu.tags.method === '끓이기') {
+                    weatherAdjustment -= 30.0;
+                }
+                // 무더운 날: 부침(전) 요리도 제외/축소 (-20)
+                if (menu.tags.type === '부침' || menu.tags.method === '부침') {
+                    weatherAdjustment -= 20.0;
+                }
+                // 무더운 날: 샐러드, 면/만두(비빔/무침) 요리 선호 가중치 (+15)
+                if (['샐러드', '면/만두'].includes(menu.tags.type) || ['비빔', 'mu침', '무침'].includes(menu.tags.method)) {
+                    weatherAdjustment += 15.0;
+                }
+            }
+
             let ingredientScore = 0;
             const totalReq = [...menu.requiredVeg, ...menu.requiredMeat, ...(menu.requiredSeafood || [])];
             totalReq.forEach(req => {
@@ -871,7 +913,7 @@ function replaceOneMenu(index) {
 
             return {
                 ...menu,
-                score: tagScore + ingredientScore + penaltyScore
+                score: tagScore + weatherAdjustment + ingredientScore + penaltyScore
             };
         });
 

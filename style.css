@@ -391,6 +391,11 @@ header {
     color: var(--meat-color);
 }
 
+.badge-seafood {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
 .ingredient-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
@@ -431,6 +436,13 @@ header {
     border-color: var(--meat-color);
     transform: scale(1.05) rotate(1deg);
     box-shadow: 3px 3px 0px 0px var(--meat-color);
+}
+
+.ingredient-item.selected.seafood {
+    background: #e0f2fe;
+    border-color: #0284c7;
+    transform: scale(1.05) rotate(-1deg);
+    box-shadow: 3px 3px 0px 0px #0284c7;
 }
 
 .ingredient-emoji {

@@ -1,4 +1,4 @@
-﻿// 식재료 정의
+// 식재료 정의
 const VEG_INGREDIENTS = [
     { id: 'potato', name: '감자', emoji: '🥔', type: 'veg' },
     { id: 'onion', name: '양파', emoji: '🧅', type: 'veg' },
@@ -15,14 +15,22 @@ const MEAT_INGREDIENTS = [
     { id: 'beef', name: '소고기', emoji: '🥩', type: 'meat' }
 ];
 
+const SEAFOOD_INGREDIENTS = [
+    { id: 'shrimp', name: '새우', emoji: '🦐', type: 'seafood' },
+    { id: 'squid', name: '오징어', emoji: '🦑', type: 'seafood' },
+    { id: 'clam', name: '조개/바지락', emoji: '🦪', type: 'seafood' }
+];
+
 const BASIC_CONDIMENTS = ['식용유', '고추장', '된장', '간장'];
 
 const MENU_DATABASE = [
+    // 국/탕
     {
         name: '맑은 소고기 무국',
         tags: { type: '국/탕', situation: '일상', method: '끓이기', ingredient: '소고기' },
         requiredVeg: ['파', '양파'],
         requiredMeat: ['소고기'],
+        requiredSeafood: [],
         others: ['무', '마늘', '국간장'],
         score: 0
     },
@@ -31,6 +39,7 @@ const MENU_DATABASE = [
         tags: { type: '국/탕', situation: '해장', method: '끓이기', ingredient: '닭고기' },
         requiredVeg: ['파', '버섯', '양파'],
         requiredMeat: ['닭고기'],
+        requiredSeafood: [],
         others: ['고춧가루', '국간장', '마늘'],
         score: 0
     },
@@ -39,14 +48,72 @@ const MENU_DATABASE = [
         tags: { type: '국/탕', situation: '영양식', method: '끓이기', ingredient: '채소류' },
         requiredVeg: ['버섯', '파'],
         requiredMeat: [],
+        requiredSeafood: [],
         others: ['들깨가루', '찹쌀가루', '국간장'],
         score: 0
     },
+    {
+        name: '맑은 감자국',
+        tags: { type: '국/탕', situation: '초스피드', method: '끓이기', ingredient: '채소류' },
+        requiredVeg: ['감자', '양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['마늘', '국간장', '다시마'],
+        score: 0
+    },
+    {
+        name: '맑은 소고기 미역국',
+        tags: { type: '국/탕', situation: '영양식', method: '끓이기', ingredient: '소고기' },
+        requiredVeg: [],
+        requiredMeat: ['소고기'],
+        requiredSeafood: [],
+        others: ['미역', '참기름', '마늘', '국간장'],
+        score: 0
+    },
+    {
+        name: '맑은 닭곰탕',
+        tags: { type: '국/탕', situation: '영양식', method: '끓이기', ingredient: '닭고기' },
+        requiredVeg: ['파', '양파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['마늘', '소금', '후추'],
+        score: 0
+    },
+    {
+        name: '두부 버섯 전골',
+        tags: { type: '국/탕', situation: '영양식', method: '끓이기', ingredient: '채소류' },
+        requiredVeg: ['버섯', '양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['두부', '국간장', '고춧가루'],
+        score: 0
+    },
+    {
+        name: '시원한 홍합 바지락탕',
+        tags: { type: '국/탕', situation: '해장', method: '끓이기', ingredient: '해물류' },
+        requiredVeg: ['파'],
+        requiredMeat: [],
+        requiredSeafood: ['조개/바지락'],
+        others: ['청양고추', '마늘', '소금'],
+        score: 0
+    },
+    {
+        name: '얼큰 해물 짬뽕탕',
+        tags: { type: '국/탕', situation: '술안주', method: '끓이기', ingredient: '해물류' },
+        requiredVeg: ['양배추', '파', '양파', '버섯'],
+        requiredMeat: [],
+        requiredSeafood: ['새우', '오징어'],
+        others: ['고춧가루', '굴소스', '마늘'],
+        score: 0
+    },
+
+    // 찌개
     {
         name: '돼지고기 김치찌개',
         tags: { type: '찌개', situation: '일상', method: '끓이기', ingredient: '돼지고기' },
         requiredVeg: ['양파', '파'],
         requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
         others: ['김치', '두부', '마늘'],
         score: 0
     },
@@ -55,6 +122,7 @@ const MENU_DATABASE = [
         tags: { type: '찌개', situation: '술안주', method: '끓이기', ingredient: '돼지고기' },
         requiredVeg: ['버섯', '감자', '양파', '파'],
         requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
         others: ['고추장', '고춧가루', '두부'],
         score: 0
     },
@@ -63,108 +131,36 @@ const MENU_DATABASE = [
         tags: { type: '찌개', situation: '일상', method: '끓이기', ingredient: '소고기' },
         requiredVeg: ['호박', '양파', '파', '버섯'],
         requiredMeat: ['소고기'],
+        requiredSeafood: [],
         others: ['된장', '두부', '마늘'],
         score: 0
-    }
-];
-
-const MENU_DATABASE_PART2 = [
-    {
-        name: '바삭한 감자전',
-        tags: { type: '부침', situation: '술안주', method: '부침', ingredient: '채소류' },
-        requiredVeg: ['감자', '양파'],
-        requiredMeat: [],
-        others: ['부침가루', '식용유'],
-        score: 0
     },
     {
-        name: '백종원 표 야채튀김',
-        tags: { type: '튀김류', situation: '간식', method: '튀김', ingredient: '채소류' },
-        requiredVeg: ['당근', '감자', '양파'],
-        requiredMeat: [],
-        others: ['튀김가루', '식용유'],
-        score: 0
-    },
-    {
-        name: '돼지고기 육전',
-        tags: { type: '부침', situation: '명절', method: '부침', ingredient: '돼지고기' },
-        requiredVeg: ['파'],
+        name: '돼지고기 짜글이',
+        tags: { type: '찌개', situation: '일상', method: '끓이기', ingredient: '돼지고기' },
+        requiredVeg: ['감자', '양파', '파'],
         requiredMeat: ['돼지고기'],
-        others: ['부침가루', '달걀', '식용유'],
+        requiredSeafood: [],
+        others: ['고추장', '고춧가루', '간장'],
         score: 0
     },
     {
-        name: '뜨끈한 닭칼국수',
-        tags: { type: '면/만두', situation: '영양식', method: '끓이기', ingredient: '닭고기' },
-        requiredVeg: ['호박', '파', '양파'],
-        requiredMeat: ['닭고기'],
-        others: ['칼국수면', '다시마', '마늘'],
-        score: 0
-    },
-    {
-        name: '베이컨 크림 파스타',
-        tags: { type: '양식', situation: '일상', method: '볶음', ingredient: '가공식품류' },
-        requiredVeg: ['양파', '버섯'],
-        requiredMeat: [],
-        others: ['스파게티면', '베이컨', '크림소스'],
-        score: 0
-    },
-    {
-        name: '새콤달콤 비빔국수',
-        tags: { type: '면/만두', situation: '초스피드', method: '비빔', ingredient: '채소류' },
-        requiredVeg: ['양파', '당근'],
-        requiredMeat: [],
-        others: ['소면', '초고추장', '참기름', '오이'],
-        score: 0
-    },
-    {
-        name: '마늘 오일파스타',
-        tags: { type: '양식', situation: '초스피드', method: '볶음', ingredient: '채소류' },
-        requiredVeg: ['파'],
-        requiredMeat: [],
-        others: ['파스타면', '올리브오일', '마늘', '페페론치노'],
-        score: 0
-    }
-];
-MENU_DATABASE.push(...MENU_DATABASE_PART2);
-const MENU_DATABASE_PART3 = [
-    {
-        name: '소고기 야채 비빔밥',
-        tags: { type: '밥/죽/떡', situation: '일상', method: '비빔', ingredient: '소고기' },
-        requiredVeg: ['당근', '호박', '버섯'],
-        requiredMeat: ['소고기'],
-        others: ['밥', '계란프라이', '고추장', '참기름'],
-        score: 0
-    },
-    {
-        name: '매콤 국물 떡볶이',
-        tags: { type: '밥/죽/떡', situation: '간식', method: '끓이기', ingredient: '밀가루' },
+        name: '바지락 순두부찌개',
+        tags: { type: '찌개', situation: '일상', method: '끓이기', ingredient: '해물류' },
         requiredVeg: ['파', '양파'],
         requiredMeat: [],
-        others: ['떡볶이떡', '어묵', '고추장', '설탕'],
+        requiredSeafood: ['조개/바지락'],
+        others: ['순두부', '달걀', '고춧가루'],
         score: 0
     },
-    {
-        name: '닭가슴살 샐러드',
-        tags: { type: '샐러드', situation: '다이어트', method: '무침', ingredient: '닭고기' },
-        requiredVeg: ['양배추', '당근', '양파'],
-        requiredMeat: ['닭고기'],
-        others: ['샐러드드레싱', '방울토마토', '올리브유'],
-        score: 0
-    },
-    {
-        name: '초스피드 계란 간장비빔밥',
-        tags: { type: '밥/죽/떡', situation: '초스피드', method: '비빔', ingredient: '달걀/유제품' },
-        requiredVeg: ['파'],
-        requiredMeat: [],
-        others: ['참치캔', '김', '계란프라이', '밥', '간장'],
-        score: 0
-    },
+
+    // 메인반찬
     {
         name: '돼지고기 양배추 볶음',
         tags: { type: '메인반찬', situation: '일상', method: '볶음', ingredient: '돼지고기' },
         requiredVeg: ['양배추', '양파', '파'],
         requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
         others: ['굴소스', '식용유', '통깨'],
         score: 0
     },
@@ -173,42 +169,368 @@ const MENU_DATABASE_PART3 = [
         tags: { type: '메인반찬', situation: '영양식', method: '조림', ingredient: '닭고기' },
         requiredVeg: ['감자', '양파', '파', '당근'],
         requiredMeat: ['닭고기'],
+        requiredSeafood: [],
         others: ['고춧가루', '간장', '마늘', '설탕'],
         score: 0
     },
     {
+        name: '돼지고기 제육볶음',
+        tags: { type: '메인반찬', situation: '일상', method: '볶음', ingredient: '돼지고기' },
+        requiredVeg: ['양파', '파'],
+        requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
+        others: ['고추장', '고춧가루', '간장', '설탕'],
+        score: 0
+    },
+    {
+        name: '소불고기',
+        tags: { type: '메인반찬', situation: '손님접대', method: '볶음', ingredient: '소고기' },
+        requiredVeg: ['양파', '파', '버섯', '당근'],
+        requiredMeat: ['소고기'],
+        requiredSeafood: [],
+        others: ['간장', '설탕', '참기름', '마늘'],
+        score: 0
+    },
+    {
+        name: '매콤 닭갈비',
+        tags: { type: '메인반찬', situation: '술안주', method: '볶음', ingredient: '닭고기' },
+        requiredVeg: ['닭고기', '양배추', '양파', '파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['고추장', '고춧가루', '설탕', '간장'],
+        score: 0
+    },
+    {
+        name: '안동 찜닭',
+        tags: { type: '메인반찬', situation: '손님접대', method: '조림', ingredient: '닭고기' },
+        requiredVeg: ['감자', '당근', '양파', '파', '버섯'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['간장', '설탕', '당면', '마늘'],
+        score: 0
+    },
+    {
+        name: '오징어 볶음',
+        tags: { type: '메인반찬', situation: '일상', method: '볶음', ingredient: '해물류' },
+        requiredVeg: ['양배추', '양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: ['오징어'],
+        others: ['고추장', '고춧가루', '물엿'],
+        score: 0
+    },
+    {
+        name: '백종원 오삼불고기',
+        tags: { type: '메인반찬', situation: '술안주', method: '볶음', ingredient: '돼지고기' },
+        requiredVeg: ['양파', '파'],
+        requiredMeat: ['돼지고기'],
+        requiredSeafood: ['오징어'],
+        others: ['고추장', '고춧가루', '설탕'],
+        score: 0
+    },
+    {
+        name: '중국식 양배추 볶음',
+        tags: { type: '메인반찬', situation: '초스피드', method: '볶음', ingredient: '채소류' },
+        requiredVeg: ['양배추', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['건고추', '굴소스', '식용유'],
+        score: 0
+    },
+
+    // 부침/튀김
+    {
+        name: '바삭한 감자전',
+        tags: { type: '부침', situation: '술안주', method: '부침', ingredient: '채소류' },
+        requiredVeg: ['감자', '양파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['부침가루', '식용유'],
+        score: 0
+    },
+    {
+        name: '돼지고기 육전',
+        tags: { type: '부침', situation: '일상', method: '부침', ingredient: '돼지고기' },
+        requiredVeg: ['파'],
+        requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
+        others: ['부침가루', '달걀', '식용유'],
+        score: 0
+    },
+    {
+        name: '호박전 & 버섯전',
+        tags: { type: '부침', situation: '술안주', method: '부침', ingredient: '채소류' },
+        requiredVeg: ['호박', '버섯'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['부침가루', '달걀', '식용유'],
+        score: 0
+    },
+    {
+        name: '해물 파전',
+        tags: { type: '부침', situation: '술안주', method: '부침', ingredient: '해물류' },
+        requiredVeg: ['파'],
+        requiredMeat: [],
+        requiredSeafood: ['새우', '오징어'],
+        others: ['부침가루', '식용유', '청양고추'],
+        score: 0
+    },
+    {
+        name: '모둠 야채 튀김',
+        tags: { type: '튀김류', situation: '간식', method: '튀김', ingredient: '채소류' },
+        requiredVeg: ['당근', '감자', '양파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['튀김가루', '식용유'],
+        score: 0
+    },
+
+    // 면/만두
+    {
+        name: '뜨끈한 닭칼국수',
+        tags: { type: '면/만두', situation: '영양식', method: '끓이기', ingredient: '닭고기' },
+        requiredVeg: ['호박', '파', '양파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['칼국수면', '다시마', '마늘'],
+        score: 0
+    },
+    {
+        name: '새콤달콤 비빔국수',
+        tags: { type: '면/만두', situation: '초스피드', method: '비빔', ingredient: '채소류' },
+        requiredVeg: ['양파', '당근'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['소면', '초고추장', '참기름', '오이'],
+        score: 0
+    },
+    {
+        name: '소고기 궁중잡채',
+        tags: { type: '면/만두', situation: '손님접대', method: '볶음', ingredient: '소고기' },
+        requiredVeg: ['당근', '양파', '버섯', '파'],
+        requiredMeat: ['소고기'],
+        requiredSeafood: [],
+        others: ['당면', '간장', '설탕', '참기름'],
+        score: 0
+    },
+    {
+        name: '새콤달콤 골뱅이 소면',
+        tags: { type: '면/만두', situation: '술안주', method: '무침', ingredient: '채소류' },
+        requiredVeg: ['양배추', '양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['골뱅이캔', '소면', '고추장', '고춧가루'],
+        score: 0
+    },
+    {
+        name: '얼큰 감자 수제비',
+        tags: { type: '면/만두', situation: '일상', method: '끓이기', ingredient: '채소류' },
+        requiredVeg: ['감자', '호박', '양파', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['밀가루', '국간장', '멸치육수'],
+        score: 0
+    },
+
+    // 밥/죽/떡
+    {
+        name: '소고기 야채 비빔밥',
+        tags: { type: '밥/죽/떡', situation: '일상', method: '비빔', ingredient: '소고기' },
+        requiredVeg: ['당근', '호박', '버섯'],
+        requiredMeat: ['소고기'],
+        requiredSeafood: [],
+        others: ['밥', '계란프라이', '고추장', '참기름'],
+        score: 0
+    },
+    {
+        name: '초스피드 계란 간장비빔밥',
+        tags: { type: '밥/죽/떡', situation: '초스피드', method: '비빔', ingredient: '달걀/유제품' },
+        requiredVeg: ['파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['참치캔', '김', '계란프라이', '밥', '간장'],
+        score: 0
+    },
+    {
+        name: '돼지고기 양배추 덮밥',
+        tags: { type: '밥/죽/떡', situation: '초스피드', method: '볶음', ingredient: '돼지고기' },
+        requiredVeg: ['양배추', '양파', '파'],
+        requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
+        others: ['밥', '굴소스', '달걀'],
+        score: 0
+    },
+    {
+        name: '치킨 카레라이스',
+        tags: { type: '밥/죽/떡', situation: '초스피드', method: '끓이기', ingredient: '닭고기' },
+        requiredVeg: ['감자', '당근', '양파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['밥', '카레가루', '식용유'],
+        score: 0
+    },
+    {
+        name: '닭가슴살 양배추 쌈밥',
+        tags: { type: '밥/죽/떡', situation: '영양식', method: '삶기', ingredient: '닭고기' },
+        requiredVeg: ['양배추'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['밥', '쌈장'],
+        score: 0
+    },
+    {
+        name: '참치 양배추 쌈장밥',
+        tags: { type: '밥/죽/떡', situation: '초스피드', method: '비빔', ingredient: '채소류' },
+        requiredVeg: ['양배추'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['참치캔', '고추장', '참기름', '밥'],
+        score: 0
+    },
+    {
+        name: '새우 볶음밥',
+        tags: { type: '밥/죽/떡', situation: '초스피드', method: '볶음', ingredient: '해물류' },
+        requiredVeg: ['당근', '파', '양파'],
+        requiredMeat: [],
+        requiredSeafood: ['새우'],
+        others: ['밥', '굴소스', '달걀'],
+        score: 0
+    },
+
+    // 퓨전/양식
+    {
         name: '소고기 찹스테이크',
-        tags: { type: '양식', situation: '손님접대', method: '볶음', ingredient: '소고기' },
+        tags: { type: '퓨전', situation: '손님접대', method: '볶음', ingredient: '소고기' },
         requiredVeg: ['양파', '버섯', '당근'],
         requiredMeat: ['소고기'],
+        requiredSeafood: [],
         others: ['스테이크소스', '식용유', '버터'],
+        score: 0
+    },
+    {
+        name: '베이컨 크림 파스타',
+        tags: { type: '퓨전', situation: '일상', method: '볶음', ingredient: '가공식품류' },
+        requiredVeg: ['양파', '버섯'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['스파게티면', '베이컨', '크림소스'],
+        score: 0
+    },
+    {
+        name: '마늘 오일파스타',
+        tags: { type: '퓨전', situation: '초스피드', method: '볶음', ingredient: '채소류' },
+        requiredVeg: ['파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['파스타면', '올리브오일', '마늘', '페페론치노'],
+        score: 0
+    },
+    {
+        name: '소고기 궁중떡볶이',
+        tags: { type: '퓨전', situation: '손님접대', method: '끓이기', ingredient: '소고기' },
+        requiredVeg: ['양파', '당근', '파', '버섯'],
+        requiredMeat: ['소고기'],
+        requiredSeafood: [],
+        others: ['떡볶이떡', '간장', '설탕'],
+        score: 0
+    },
+    {
+        name: '돼지고기 목살 스테이크',
+        tags: { type: '퓨전', situation: '손님접대', method: '굽기', ingredient: '돼지고기' },
+        requiredVeg: ['양파', '버섯'],
+        requiredMeat: ['돼지고기'],
+        requiredSeafood: [],
+        others: ['스테이크 소스', '버터', '마늘'],
+        score: 0
+    },
+    {
+        name: '길거리 토스트',
+        tags: { type: '퓨전', situation: '초스피드', method: '부침', ingredient: '채소류' },
+        requiredVeg: ['양배추', '당근', '파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['식빵', '계란', '설탕', '케첩'],
+        score: 0
+    },
+    {
+        name: '매콤 새우 감바스',
+        tags: { type: '퓨전', situation: '술안주', method: '볶음', ingredient: '해물류' },
+        requiredVeg: ['버섯'],
+        requiredMeat: [],
+        requiredSeafood: ['새우'],
+        others: ['올리브유', '마늘', '페페론치노', '바게트'],
+        score: 0
+    },
+    {
+        name: '토마토 해물 스파게티',
+        tags: { type: '퓨전', situation: '일상', method: '볶음', ingredient: '해물류' },
+        requiredVeg: ['양파', '버섯'],
+        requiredMeat: [],
+        requiredSeafood: ['새우', '오징어'],
+        others: ['스파게티면', '토마토소스', '올리브유'],
+        score: 0
+    },
+
+    // 샐러드
+    {
+        name: '닭가슴살 샐러드',
+        tags: { type: '샐러드', situation: '다이어트', method: '무침', ingredient: '닭고기' },
+        requiredVeg: ['양배추', '당근', '양파'],
+        requiredMeat: ['닭고기'],
+        requiredSeafood: [],
+        others: ['샐러드드레싱', '방울토마토', '올리브유'],
+        score: 0
+    },
+    {
+        name: '돈까스 샐러드',
+        tags: { type: '샐러드', situation: '다이어트', method: '튀김', ingredient: '채소류' },
+        requiredVeg: ['양배추', '당근', '양파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['돈까스', '샐러드드레싱'],
+        score: 0
+    },
+    {
+        name: '상큼한 오리엔탈 버섯 샐러드',
+        tags: { type: '샐러드', situation: '다이어트', method: '데치기', ingredient: '채소류' },
+        requiredVeg: ['버섯', '양배추', '양파'],
+        requiredMeat: [],
+        requiredSeafood: [],
+        others: ['오리엔탈드레싱', '참기름'],
+        score: 0
+    },
+    {
+        name: '새우 아보카도 샐러드',
+        tags: { type: '샐러드', situation: '다이어트', method: '무침', ingredient: '해물류' },
+        requiredVeg: ['양배추', '양파'],
+        requiredMeat: [],
+        requiredSeafood: ['새우'],
+        others: ['아보카도', '샐러드드레싱', '올리브유'],
         score: 0
     }
 ];
-MENU_DATABASE.push(...MENU_DATABASE_PART3);
 
 const WEATHER_TAG_RULES = {
     rainy: {
-        types: ['국/탕', '찌개', '부침', '튀김류'],
+        types: ['국/탕', '찌개', '부침', '튀김류', '퓨전'],
         situations: ['해장', '술안주', '야식', '일상'],
         methods: ['부침', '튀김', '조림', '끓이기'],
         weights: { type: 2.0, situation: 1.5, method: 1.0 }
     },
     cold_snowy: {
-        types: ['국/탕', '찌개', '밥/죽/떡'],
+        types: ['국/탕', '찌개', '밥/죽/떡', '퓨전'],
         situations: ['영양식', '일상', '손님접대'],
         methods: ['끓이기', '삶기', '굽기', '조림'],
         weights: { type: 2.0, situation: 1.0, method: 1.5 }
     },
     hot: {
-        types: ['샐러드', '면/만두', '기타'],
+        types: ['샐러드', '면/만두', '기타', '퓨전'],
         situations: ['초스피드', '다이어트', '간식', '일상'],
-        methods: ['무침', '비빔', '회', '데치기'],
+        methods: ['무침', '비빔', '회', '데치기', '볶음'],
         weights: { type: 1.5, situation: 2.0, method: 1.0 }
     },
     normal: {
-        types: ['메인반찬', '양식', '샐러드', '밥/죽/떡'],
-        situations: ['일상', '도시락', '간식', '초스피드'],
+        types: ['메인반찬', '퓨전', '샐러드', '밥/죽/떡', '면/만두'],
+        situations: ['일상', '도시락', '간식', '초스피드', '손님접대'],
         methods: ['볶음', '굽기', '비빔', '무침'],
         weights: { type: 1.0, situation: 1.0, method: 1.0 }
     }
@@ -217,6 +539,7 @@ const WEATHER_TAG_RULES = {
 const state = {
     currentWeather: 'normal',
     weatherInfo: { temp: 20, description: '맑음' },
+    dailyForecastWeathers: ['normal', 'normal', 'normal'],
     selectedIngredients: new Set(),
     shoppingList: [],
     recommendedMenus: []
@@ -233,11 +556,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function initIngredients() {
     const vegGrid = document.getElementById('veg-grid');
     const meatGrid = document.getElementById('meat-grid');
+    const seafoodGrid = document.getElementById('seafood-grid');
     VEG_INGREDIENTS.forEach(ing => {
         vegGrid.appendChild(createIngredientCard(ing));
     });
     MEAT_INGREDIENTS.forEach(ing => {
         meatGrid.appendChild(createIngredientCard(ing));
+    });
+    SEAFOOD_INGREDIENTS.forEach(ing => {
+        seafoodGrid.appendChild(createIngredientCard(ing));
     });
 }
 function createIngredientCard(ing) {
@@ -404,15 +731,21 @@ async function fetchWeather(lat, lon, locationLabel) {
             const daily = data.daily;
             dailyForecastHtml = "<div class=\"weather-forecast-3day\">";
             const labels = ["오늘", "내일", "모레"];
+            const newDailyWeathers = [];
             for (let i = 0; i < 3; i++) {
                 if (daily.time[i] !== undefined) {
                     const dayCode = daily.weathercode[i];
                     const minTemp = Math.round(daily.temperature_2m_min[i]);
                     const maxTemp = Math.round(daily.temperature_2m_max[i]);
-                    const dayMeta = getWeatherMeta(dayCode);
+                    // 최고 기온 기준이나 날씨 코드에 맞춰 메타를 계산
+                    const dayMeta = getWeatherMeta(dayCode, maxTemp);
+                    newDailyWeathers.push(dayMeta.type);
                     dailyForecastHtml += "<div class=\"forecast-day\"><span class=\"forecast-label\">" + labels[i] + "</span><div class=\"forecast-icon " + dayMeta.iconClass + "\">" + dayMeta.iconHtml + "</div><span class=\"forecast-temp\">" + minTemp + "°/" + maxTemp + "°</span></div>";
+                } else {
+                    newDailyWeathers.push('normal');
                 }
             }
+            state.dailyForecastWeathers = newDailyWeathers;
             dailyForecastHtml += "</div>";
         }
         renderWeatherCard(locationLabel, temp, currentMeta.desc, currentMeta.iconClass, currentMeta.iconHtml, dailyForecastHtml);
@@ -435,6 +768,7 @@ function renderWeatherError() {
     const select = document.getElementById("weather-manual-select");
     select.addEventListener("change", (e) => {
         state.currentWeather = e.target.value;
+        state.dailyForecastWeathers = [e.target.value, e.target.value, e.target.value];
     });
 }
 
@@ -444,39 +778,52 @@ function initEventListeners() {
 }function recommendMenus() {
     const ownedNames = [];
     state.selectedIngredients.forEach(id => {
-        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS].find(i => i.id === id);
+        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS, ...SEAFOOD_INGREDIENTS].find(i => i.id === id);
         if (item) ownedNames.push(item.name);
     });
 
-    const rule = WEATHER_TAG_RULES[state.currentWeather] || WEATHER_TAG_RULES['normal'];
+    const finalRecommendations = [];
+    const chosenNames = new Set();
 
-    const candidates = MENU_DATABASE.map(menu => {
-        let tagScore = 0;
-        if (rule.types.includes(menu.tags.type)) tagScore += rule.weights.type;
-        if (rule.situations.includes(menu.tags.situation)) tagScore += rule.weights.situation;
-        if (rule.methods.includes(menu.tags.method)) tagScore += rule.weights.method;
+    for (let day = 0; day < 3; day++) {
+        const dayWeather = state.dailyForecastWeathers[day] || 'normal';
+        const rule = WEATHER_TAG_RULES[dayWeather] || WEATHER_TAG_RULES['normal'];
 
-        let ingredientScore = 0;
-        const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
-        totalReq.forEach(req => {
-            if (ownedNames.includes(req)) ingredientScore += 2.0;
-        });
+        const candidates = MENU_DATABASE
+            .filter(menu => !chosenNames.has(menu.name))
+            .map(menu => {
+                let tagScore = 0;
+                if (rule.types.includes(menu.tags.type)) tagScore += rule.weights.type;
+                if (rule.situations.includes(menu.tags.situation)) tagScore += rule.weights.situation;
+                if (rule.methods.includes(menu.tags.method)) tagScore += rule.weights.method;
 
-        const recentMenus = JSON.parse(localStorage.getItem('recentRecommendedMenus') || '[]');
-        const isRecent = recentMenus.includes(menu.name);
-        const penaltyScore = isRecent ? -15.0 : 0.0;
+                let ingredientScore = 0;
+                const totalReq = [...menu.requiredVeg, ...menu.requiredMeat, ...(menu.requiredSeafood || [])];
+                totalReq.forEach(req => {
+                    if (ownedNames.includes(req)) ingredientScore += 2.0;
+                });
 
-        return {
-            ...menu,
-            score: tagScore + ingredientScore + penaltyScore
-        };
-    });
+                const recentMenus = JSON.parse(localStorage.getItem('recentRecommendedMenus') || '[]');
+                const isRecent = recentMenus.includes(menu.name);
+                const penaltyScore = isRecent ? -15.0 : 0.0;
 
-    const sortedCandidates = candidates
-        .sort(() => Math.random() - 0.5)
-        .sort((a, b) => b.score - a.score);
+                return {
+                    ...menu,
+                    score: tagScore + ingredientScore + penaltyScore
+                };
+            });
 
-    const finalRecommendations = sortedCandidates.slice(0, 3);
+        const sortedCandidates = candidates
+            .sort(() => Math.random() - 0.5)
+            .sort((a, b) => b.score - a.score);
+
+        if (sortedCandidates.length > 0) {
+            const chosen = sortedCandidates[0];
+            finalRecommendations.push(chosen);
+            chosenNames.add(chosen.name);
+        }
+    }
+
     state.recommendedMenus = finalRecommendations;
 
     const recentMenus = JSON.parse(localStorage.getItem('recentRecommendedMenus') || '[]');
@@ -496,11 +843,12 @@ function initEventListeners() {
 function replaceOneMenu(index) {
     const ownedNames = [];
     state.selectedIngredients.forEach(id => {
-        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS].find(i => i.id === id);
+        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS, ...SEAFOOD_INGREDIENTS].find(i => i.id === id);
         if (item) ownedNames.push(item.name);
     });
 
-    const rule = WEATHER_TAG_RULES[state.currentWeather] || WEATHER_TAG_RULES['normal'];
+    const dayWeather = state.dailyForecastWeathers[index] || 'normal';
+    const rule = WEATHER_TAG_RULES[dayWeather] || WEATHER_TAG_RULES['normal'];
     const currentMenuNames = state.recommendedMenus.map(m => m.name);
 
     const candidates = MENU_DATABASE
@@ -512,7 +860,7 @@ function replaceOneMenu(index) {
             if (rule.methods.includes(menu.tags.method)) tagScore += rule.weights.method;
 
             let ingredientScore = 0;
-            const totalReq = [...menu.requiredVeg, ...menu.requiredMeat];
+            const totalReq = [...menu.requiredVeg, ...menu.requiredMeat, ...(menu.requiredSeafood || [])];
             totalReq.forEach(req => {
                 if (ownedNames.includes(req)) ingredientScore += 2.0;
             });
@@ -552,13 +900,15 @@ function replaceOneMenu(index) {
         renderRecommendations();
         updateDecideButtons();
     }
-}function renderRecommendations() {
+}
+
+function renderRecommendations() {
     const recListDiv = document.getElementById('recommendation-list');
     const recPlaceholder = document.getElementById('recommendation-placeholder');
     
     const ownedNames = [];
     state.selectedIngredients.forEach(id => {
-        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS].find(i => i.id === id);
+        const item = [...VEG_INGREDIENTS, ...MEAT_INGREDIENTS, ...SEAFOOD_INGREDIENTS].find(i => i.id === id);
         if (item) ownedNames.push(item.name);
     });
 
@@ -569,9 +919,9 @@ function replaceOneMenu(index) {
     state.recommendedMenus.forEach((menu, index) => {
         const menuCard = document.createElement('div');
         menuCard.className = 'menu-card';
-        const totalVegAndMeat = [...menu.requiredVeg, ...menu.requiredMeat];
-        const ownedInMenu = totalVegAndMeat.filter(name => ownedNames.includes(name));
-        const missingInMenu = totalVegAndMeat.filter(name => !ownedNames.includes(name));
+        const totalVegMeatSeafood = [...menu.requiredVeg, ...menu.requiredMeat, ...(menu.requiredSeafood || [])];
+        const ownedInMenu = totalVegMeatSeafood.filter(name => ownedNames.includes(name));
+        const missingInMenu = totalVegMeatSeafood.filter(name => !ownedNames.includes(name));
 
         const recipeUrl10000 = "https://www.10000recipe.com/recipe/list.html?q=" + encodeURIComponent(menu.name);
         const isDecided = state.shoppingList.some(item => item.menu === menu.name);
